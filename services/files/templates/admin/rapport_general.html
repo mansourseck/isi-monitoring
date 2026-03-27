@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport General — ISI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:white;padding:20px;font-size:12px}
+.print-btn{display:block;margin:0 auto 20px;padding:10px 28px;background:#0f3460;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+@media print{.print-btn,.nav-bar,header{display:none}}
+.doc-header{display:flex;justify-content:space-between;border-bottom:3px solid #0f3460;padding-bottom:14px;margin-bottom:18px}
+.school h2{font-size:18px;font-weight:800;color:#0f3460}
+.school p{font-size:11px;color:#555;margin-top:2px}
+.info{text-align:right}
+.info h1{font-size:16px;font-weight:700}
+.info p{font-size:11px;color:#888;margin-top:2px}
+.stats-box{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.stat{background:#f0f4f8;border-radius:8px;padding:12px;text-align:center}
+.stat .v{font-size:22px;font-weight:800;color:#0f3460}
+.stat .l{font-size:10px;color:#888;text-transform:uppercase}
+.class-section{margin-bottom:20px;break-inside:avoid}
+.class-title{font-size:14px;font-weight:800;color:#0f3460;background:#f0f4f8;padding:8px 12px;border-radius:6px;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#1a1a2e;color:white;padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase}
+td{padding:7px 10px;border-bottom:1px solid #f0f0f0}
+tr:nth-child(even) td{background:#fafafa}
+.nh{color:#16a34a;font-weight:700}.nm{color:#d97706;font-weight:700}.nl{color:#dc2626;font-weight:700}
+.footer{text-align:center;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px;margin-top:16px}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">Imprimer / Sauvegarder en PDF</button>
+<div class="doc-header">
+  <div class="school"><h2>ISI Keur Massar</h2><p>Institut Superieur d'Informatique</p></div>
+  <div class="info"><h1>Rapport General</h1><p>Annee academique 2024-2025</p></div>
+</div>
+<div class="stats-box">
+  <div class="stat"><div class="v">{{ stats.etudiants or 0 }}</div><div class="l">Etudiants</div></div>
+  <div class="stat"><div class="v">{{ stats.profs or 0 }}</div><div class="l">Professeurs</div></div>
+  <div class="stat"><div class="v">{{ stats.classes or 0 }}</div><div class="l">Classes</div></div>
+  <div class="stat"><div class="v">{{ stats.notes or 0 }}</div><div class="l">Notes</div></div>
+</div>
+{% for item in all_data %}
+{% set c = item.classe %}
+<div class="class-section">
+  <div class="class-title">{{ c.nom }} — {{ c.filiere_nom or '—' }} — {{ item.etudiants|length }} etudiant(s)</div>
+  <table>
+    <thead><tr><th>Matricule</th><th>Nom</th><th>Moyenne S1</th><th>Credits S1</th><th>Moyenne S2</th><th>Credits S2</th><th>Statut</th></tr></thead>
+    <tbody>
+    {% for ed in item.etudiants %}
+    {% set e = ed.etudiant %}
+    {% set b = ed.bulletin %}
+    {% set s1 = b.get('s1',{}) %}
+    {% set s2 = b.get('s2',{}) %}
+    <tr>
+      <td><span style="font-family:monospace;font-size:10px">{{ e.matricule }}</span></td>
+      <td><strong>{{ e.prenom }} {{ e.nom }}</strong></td>
+      <td class="{% if s1.get('moyenne',0) >= 14 %}nh{% elif s1.get('moyenne',0) >= 10 %}nm{% elif s1.get('moyenne') %}nl{% endif %}">
+        {{ s1.get('moyenne','—') }}/20
+      </td>
+      <td>{{ s1.get('credits_valides','—') }}/60</td>
+      <td class="{% if s2.get('moyenne',0) >= 14 %}nh{% elif s2.get('moyenne',0) >= 10 %}nm{% elif s2.get('moyenne') %}nl{% endif %}">
+        {{ s2.get('moyenne','—') }}/20
+      </td>
+      <td>{{ s2.get('credits_valides','—') }}/60</td>
+      <td>
+        {% set valide = s1.get('valide') and s2.get('valide') %}
+        {% if valide %}<span style="color:#16a34a;font-weight:700">ADMIS</span>
+        {% elif s1.get('moyenne') or s2.get('moyenne') %}<span style="color:#d97706;font-weight:700">EN COURS</span>
+        {% else %}<span style="color:#888">—</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+<div class="footer">Rapport genere par ISI Monitor — ISI Keur Massar — 2024-2025</div>
+</body>
+</html>

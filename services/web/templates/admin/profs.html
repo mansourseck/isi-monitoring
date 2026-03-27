@@ -1,0 +1,37 @@
+{% extends "shared/base.html" %}
+{% block title %}Professeurs{% endblock %}
+{% block page_title %}Professeurs{% endblock %}
+{% block breadcrumb %}Scolarite / Professeurs{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    Liste des professeurs <span class="badge badge-blue">{{ profs|length }}</span>
+    <div style="display:flex;gap:8px">
+      <form method="GET">
+        <select name="dept_id" onchange="this.form.submit()" style="padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px">
+          <option value="">Tous les departements</option>
+          {% for d in depts %}<option value="{{ d.id }}" {% if dept_id==d.id|string %}selected{% endif %}>{{ d.nom }}</option>{% endfor %}
+        </select>
+      </form>
+      <a href="/admin/profs/ajouter" class="btn btn-primary btn-sm">+ Ajouter</a>
+    </div>
+  </div>
+  <div class="table-wrap">
+  <table><thead><tr><th>Nom</th><th>Email</th><th>Grade</th><th>Specialite</th><th>Departement</th><th>Actions</th></tr></thead>
+  <tbody>{% for p in profs %}<tr>
+    <td><strong>{{ p.prenom }} {{ p.nom }}</strong><br><span style="font-size:11px;color:#aaa">{{ p.username }}</span></td>
+    <td>{{ p.email or '—' }}</td>
+    <td><span class="badge badge-purple">{{ p.grade or '—' }}</span></td>
+    <td>{{ p.specialite or '—' }}</td>
+    <td><span class="badge badge-teal">{{ p.dept_code or '—' }}</span></td>
+    <td>
+      <div class="btn-group">
+        <a href="/admin/profs/{{ p.prof_id }}" class="btn btn-secondary btn-sm">Voir</a>
+        <a href="/admin/profs/{{ p.prof_id }}/supprimer" onclick="return confirm('Supprimer ?')" class="btn btn-danger btn-sm">Supprimer</a>
+      </div>
+    </td>
+  </tr>{% else %}<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px">Aucun professeur</td></tr>{% endfor %}
+  </tbody></table>
+  </div>
+</div>
+{% endblock %}

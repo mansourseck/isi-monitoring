@@ -1,0 +1,45 @@
+{% extends "shared/base.html" %}
+{% block title %}Absences{% endblock %}
+{% block page_title %}Gestion des absences{% endblock %}
+{% block breadcrumb %}Mes classes / Absences{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Enregistrer une absence</div>
+  <form method="POST" action="/prof/absences">
+    <div class="form-row">
+      <div class="fg"><label>Etudiant</label>
+        <select name="etudiant_id" required>
+          <option value="">-- Choisir --</option>
+          {% for e in etudiants %}<option value="{{ e.etudiant_id }}">{{ e.prenom }} {{ e.nom }} ({{ e.classe_nom }})</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg"><label>Matiere (mes cours)</label>
+        <select name="matiere_id" required>
+          <option value="">-- Choisir --</option>
+          {% for m in matieres %}<option value="{{ m.id }}">{{ m.nom }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg"><label>Justifiee ?</label>
+        <select name="justifiee">
+          <option value="">Non</option>
+          <option value="on">Oui</option>
+        </select>
+      </div>
+      <div class="fg"><label>Motif</label><input type="text" name="motif" placeholder="Motif si justifiee"></div>
+      <div class="fg"><label>&nbsp;</label><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+    </div>
+  </form>
+</div>
+<div class="card">
+  <div class="card-title">Absences enregistrees <span class="badge badge-blue">{{ absences|length }}</span></div>
+  <table><thead><tr><th>Etudiant</th><th>Matiere</th><th>Date</th><th>Justifiee</th><th>Motif</th></tr></thead>
+  <tbody>{% for a in absences %}<tr class="{% if not a.justifiee %}warn-row{% endif %}">
+    <td><strong>{{ a.prenom }} {{ a.nom }}</strong></td>
+    <td>{{ a.matiere_nom }}</td>
+    <td>{{ a.date_absence }}</td>
+    <td>{% if a.justifiee %}<span class="badge badge-green">Oui</span>{% else %}<span class="badge badge-red">Non</span>{% endif %}</td>
+    <td>{{ a.motif or '—' }}</td>
+  </tr>{% else %}<tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px">Aucune absence</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "shared/base.html" %}
+{% block title %}Mes etudiants{% endblock %}
+{% block page_title %}Mes etudiants{% endblock %}
+{% block breadcrumb %}Mes classes / Etudiants{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Etudiants de mes classes <span class="badge badge-blue">{{ etudiants|length }}</span></div>
+  <div class="table-wrap">
+  <table><thead><tr><th>Matricule</th><th>Nom</th><th>Email</th><th>Classe</th><th>Filiere</th></tr></thead>
+  <tbody>{% for e in etudiants %}<tr>
+    <td><span class="mat">{{ e.matricule }}</span></td>
+    <td><strong>{{ e.prenom }} {{ e.nom }}</strong></td>
+    <td>{{ e.email or '—' }}</td>
+    <td><span class="badge badge-blue">{{ e.classe_nom }}</span></td>
+    <td><span class="badge badge-teal">{{ e.filiere_code }}</span></td>
+  </tr>{% else %}<tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px">Aucun etudiant</td></tr>{% endfor %}
+  </tbody></table>
+  </div>
+</div>
+{% endblock %}

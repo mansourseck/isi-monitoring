@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>NetMonitor — Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e0e0e0; min-height: 100vh; }
+    header { background: #1a1d2e; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a2d3e; }
+    header h1 { font-size: 20px; font-weight: 700; color: #7c83ff; letter-spacing: 1px; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    #last-update { font-size: 12px; color: #666; }
+    .refresh-btn { background: #7c83ff22; color: #7c83ff; border: 1px solid #7c83ff44; padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+    .refresh-btn:hover { background: #7c83ff44; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: #1a1d2e; border-radius: 12px; padding: 18px 22px; border: 1px solid #2a2d3e; }
+    .stat-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-value { font-size: 32px; font-weight: 700; margin-top: 6px; }
+    .green { color: #4caf89; } .red { color: #e05c5c; } .blue { color: #7c83ff; } .amber { color: #f0a500; }
+    .services-title { font-size: 13px; color: #666; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px; }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-bottom: 28px; }
+    .service-card { background: #1a1d2e; border-radius: 14px; padding: 22px; border: 1px solid #2a2d3e; border-left: 4px solid #555; }
+    .service-card.UP { border-left-color: #4caf89; }
+    .service-card.DOWN { border-left-color: #e05c5c; }
+    .service-card.DEGRADED { border-left-color: #f0a500; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+    .service-name { font-size: 15px; font-weight: 600; }
+    .service-meta { font-size: 12px; color: #666; margin-top: 4px; font-family: monospace; }
+    .vlan-tag { display: inline-block; background: #252840; color: #7c83ff; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-top: 4px; font-family: monospace; }
+    .badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .badge.UP { background: #1a3a2a; color: #4caf89; }
+    .badge.DOWN { background: #3a1a1a; color: #e05c5c; }
+    .badge.DEGRADED { background: #3a2a0a; color: #f0a500; }
+    .badge.unknown { background: #2a2a2a; color: #888; }
+    .card-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .metric { text-align: center; background: #12152a; border-radius: 8px; padding: 10px 6px; }
+    .metric .m-val { font-size: 16px; font-weight: 700; color: #7c83ff; }
+    .metric .m-label { font-size: 10px; color: #555; margin-top: 3px; text-transform: uppercase; }
+    .service-link { display: block; text-align: center; margin-top: 14px; padding: 8px; border-radius: 8px; background: #7c83ff18; color: #7c83ff; text-decoration: none; font-size: 12px; border: 1px solid #7c83ff33; }
+    .service-link:hover { background: #7c83ff33; }
+    .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 28px; }
+    .chart-card { background: #1a1d2e; border-radius: 14px; padding: 22px; border: 1px solid #2a2d3e; }
+    .chart-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+    .history-card { background: #1a1d2e; border-radius: 14px; padding: 22px; border: 1px solid #2a2d3e; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 10px 14px; text-align: left; font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px; background: #12152a; }
+    td { padding: 10px 14px; border-top: 1px solid #1e2130; font-size: 13px; }
+    tr:hover td { background: #1e2035; }
+    .s-UP { color: #4caf89; font-weight: 700; }
+    .s-DOWN { color: #e05c5c; font-weight: 700; }
+    .s-DEGRADED { color: #f0a500; font-weight: 700; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>NetMonitor — ISI Keur Massar</h1>
+  <div class="header-right">
+    <span id="last-update">Chargement...</span>
+    <button class="refresh-btn" onclick="loadAll()">Actualiser</button>
+  </div>
+</header>
+<div class="container">
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-label">Services UP</div><div class="stat-value green" id="cnt-up">—</div></div>
+    <div class="stat-card"><div class="stat-label">Services DOWN</div><div class="stat-value red" id="cnt-down">—</div></div>
+    <div class="stat-card"><div class="stat-label">Latence moyenne</div><div class="stat-value blue" id="avg-lat">—</div></div>
+    <div class="stat-card"><div class="stat-label">Checks effectues</div><div class="stat-value amber" id="total-checks">—</div></div>
+  </div>
+  <div class="services-title">Etat des services en temps reel</div>
+  <div class="services-grid" id="services-grid"></div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Latence des services (derniers checks)</div>
+      <canvas id="chart-latency" height="120"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Disponibilite globale</div>
+      <canvas id="chart-uptime" height="120"></canvas>
+    </div>
+  </div>
+  <div class="history-card">
+    <div class="chart-title" style="margin-bottom:16px">Historique des verifications</div>
+    <table>
+      <thead><tr><th>Heure</th><th>Service</th><th>VLAN</th><th>Statut</th><th>Latence</th><th>HTTP</th></tr></thead>
+      <tbody id="history-body"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+let servicesData = [];
+let latencyChart = null, uptimeChart = null;
+const SERVICE_URLS = {
+  "Portail Web ISI":     "http://web.isi-monitor.local:8081",
+  "Serveur Releves ISI": "http://files.isi-monitor.local:8082",
+};
+async function loadServices() {
+  const res = await fetch('/api/services');
+  servicesData = await res.json();
+  const grid = document.getElementById('services-grid');
+  grid.innerHTML = '';
+  let up = 0, down = 0, totalLat = 0, cntLat = 0;
+  servicesData.forEach(s => {
+    const st = s.status || 'unknown';
+    if (st === 'UP') up++;
+    if (st === 'DOWN') down++;
+    if (s.latency_ms) { totalLat += s.latency_ms; cntLat++; }
+    const url = SERVICE_URLS[s.name] || '#';
+    const card = document.createElement('div');
+    card.className = 'service-card ' + st;
+    card.innerHTML = `
+      <div class="card-header">
+        <div>
+          <div class="service-name">${s.name}</div>
+          <div class="service-meta">${s.ip}</div>
+          <div class="vlan-tag">VLAN ${s.vlan}</div>
+        </div>
+        <span class="badge ${st}">${st}</span>
+      </div>
+      <div class="card-metrics">
+        <div class="metric"><div class="m-val">${s.latency_ms ? s.latency_ms.toFixed(1)+'ms' : '—'}</div><div class="m-label">Latence</div></div>
+        <div class="metric"><div class="m-val">${s.http_code || '—'}</div><div class="m-label">HTTP</div></div>
+        <div class="metric"><div class="m-val">${s.checked_at || '—'}</div><div class="m-label">Derniere verif</div></div>
+      </div>
+      <a href="${url}" target="_blank" class="service-link">Ouvrir le service</a>`;
+    grid.appendChild(card);
+  });
+  document.getElementById('cnt-up').textContent = up;
+  document.getElementById('cnt-down').textContent = down;
+  document.getElementById('avg-lat').textContent = cntLat ? (totalLat/cntLat).toFixed(1)+'ms' : '—';
+}
+async function loadHistory() {
+  if (!servicesData.length) return;
+  const tbody = document.getElementById('history-body');
+  tbody.innerHTML = '';
+  let totalChecks = 0, upCount = 0, downCount = 0;
+  const latLabels = [], latData = [], latColors = [];
+  for (const s of servicesData) {
+    const res = await fetch('/api/history/' + s.id);
+    const rows = await res.json();
+    totalChecks += rows.length;
+    if (rows.length > 0) {
+      latLabels.push(s.name.replace(' ISI',''));
+      latData.push(rows[0].latency_ms || 0);
+      latColors.push(rows[0].status === 'UP' ? '#4caf89' : rows[0].status === 'DOWN' ? '#e05c5c' : '#f0a500');
+    }
+    rows.forEach(r => {
+      if (r.status === 'UP') upCount++; else downCount++;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.checked_at}</td><td>${s.name}</td><td style="font-family:monospace;color:#7c83ff">VLAN ${s.vlan}</td><td class="s-${r.status}">${r.status}</td><td>${r.latency_ms ? r.latency_ms.toFixed(1)+' ms' : '—'}</td><td>${r.http_code || '—'}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  document.getElementById('total-checks').textContent = totalChecks;
+  if (latencyChart) latencyChart.destroy();
+  latencyChart = new Chart(document.getElementById('chart-latency'), {
+    type: 'bar',
+    data: { labels: latLabels, datasets: [{ label: 'Latence (ms)', data: latData, backgroundColor: latColors, borderRadius: 6 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#666' }, grid: { color: '#1e2130' } }, x: { ticks: { color: '#888' }, grid: { display: false } } } }
+  });
+  if (uptimeChart) uptimeChart.destroy();
+  uptimeChart = new Chart(document.getElementById('chart-uptime'), {
+    type: 'doughnut',
+    data: { labels: ['UP', 'DOWN'], datasets: [{ data: [upCount, downCount], backgroundColor: ['#4caf89', '#e05c5c'], borderWidth: 0 }] },
+    options: { responsive: true, plugins: { legend: { labels: { color: '#888', font: { size: 12 } } } }, cutout: '70%' }
+  });
+}
+async function loadAll() {
+  await loadServices();
+  await loadHistory();
+  document.getElementById('last-update').textContent = 'Mis a jour : ' + new Date().toLocaleTimeString('fr-FR');
+}
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>

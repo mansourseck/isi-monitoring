@@ -1,0 +1,28 @@
+{% extends "shared/base.html" %}
+{% block title %}Departements{% endblock %}
+{% block page_title %}Departements{% endblock %}
+{% block breadcrumb %}Structure / Departements{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Ajouter un departement</div>
+  <form method="POST" action="/admin/departements/ajouter">
+    <div class="form-row">
+      <div class="fg"><label>Nom</label><input type="text" name="nom" placeholder="Reseaux et Systemes" required></div>
+      <div class="fg"><label>Code</label><input type="text" name="code" placeholder="RS" required></div>
+      <div class="fg"><label>Description</label><input type="text" name="description" placeholder="Description optionnelle"></div>
+      <div class="fg"><label>&nbsp;</label><button type="submit" class="btn btn-primary">Ajouter</button></div>
+    </div>
+  </form>
+</div>
+<div class="card">
+  <div class="card-title">Departements <span class="badge badge-blue">{{ depts|length }}</span></div>
+  <table><thead><tr><th>Code</th><th>Nom</th><th>Description</th><th>Action</th></tr></thead>
+  <tbody>{% for d in depts %}<tr>
+    <td><span class="badge badge-purple">{{ d.code }}</span></td>
+    <td><strong>{{ d.nom }}</strong></td>
+    <td>{{ d.description or '—' }}</td>
+    <td><a href="/admin/departements/{{ d.id }}/supprimer" onclick="return confirm('Supprimer ?')" class="btn btn-danger btn-sm">Supprimer</a></td>
+  </tr>{% else %}<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px">Aucun departement</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

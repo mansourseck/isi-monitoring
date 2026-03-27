@@ -1,0 +1,51 @@
+{% extends "shared/base.html" %}
+{% block title %}Matieres{% endblock %}
+{% block page_title %}Matieres{% endblock %}
+{% block breadcrumb %}Structure / Matieres{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Ajouter une matiere</div>
+  <form method="POST" action="/admin/matieres/ajouter">
+    <div class="form-row">
+      <div class="fg"><label>Nom</label><input type="text" name="nom" placeholder="Reseaux Avances" required></div>
+      <div class="fg"><label>Code</label><input type="text" name="code" placeholder="RES601" required></div>
+      <div class="fg"><label>Credits</label><input type="number" name="credits" min="1" max="20" value="3" required></div>
+      <div class="fg"><label>Coefficient</label><input type="number" name="coefficient" min="1" max="10" step="0.5" value="1" required></div>
+      <div class="fg"><label>Classe</label>
+        <select name="classe_id" required>
+          <option value="">-- Choisir --</option>
+          {% for c in classes %}<option value="{{ c.id }}" {% if classe_id==c.id|string %}selected{% endif %}>{{ c.nom }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg"><label>Semestre</label>
+        <select name="semestre">
+          <option value="1">Semestre 1</option>
+          <option value="2">Semestre 2</option>
+        </select>
+      </div>
+      <div class="fg"><label>&nbsp;</label><button type="submit" class="btn btn-primary">Ajouter</button></div>
+    </div>
+  </form>
+</div>
+<div class="card">
+  <div class="card-title">Matieres
+    <form method="GET" style="display:inline-flex;gap:6px;margin-left:10px">
+      <select name="classe_id" onchange="this.form.submit()" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px">
+        <option value="">Toutes les classes</option>
+        {% for c in classes %}<option value="{{ c.id }}" {% if classe_id==c.id|string %}selected{% endif %}>{{ c.nom }}</option>{% endfor %}
+      </select>
+    </form>
+  </div>
+  <table><thead><tr><th>Code</th><th>Nom</th><th>Credits</th><th>Coeff</th><th>Classe</th><th>Semestre</th><th>Action</th></tr></thead>
+  <tbody>{% for m in matieres %}<tr>
+    <td><span class="mat">{{ m.code }}</span></td>
+    <td><strong>{{ m.nom }}</strong></td>
+    <td><span class="badge badge-teal">{{ m.credits }} cr</span></td>
+    <td>{{ m.coefficient }}</td>
+    <td><span class="badge badge-blue">{{ m.classe_nom or '—' }}</span></td>
+    <td><span class="badge badge-{% if m.semestre==1 %}amber{% else %}purple{% endif %}">S{{ m.semestre }}</span></td>
+    <td><a href="/admin/matieres/{{ m.id }}/supprimer" onclick="return confirm('Supprimer ?')" class="btn btn-danger btn-sm">Supprimer</a></td>
+  </tr>{% else %}<tr><td colspan="7" style="text-align:center;color:#aaa;padding:20px">Aucune matiere</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

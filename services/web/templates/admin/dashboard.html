@@ -1,0 +1,27 @@
+{% extends "shared/base.html" %}
+{% block title %}Dashboard Admin{% endblock %}
+{% block page_title %}Dashboard Administrateur{% endblock %}
+{% block breadcrumb %}Accueil{% endblock %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat"><div class="stat-label">Etudiants</div><div class="stat-value">{{ stats.etudiants or 0 }}</div></div>
+  <div class="stat blue"><div class="stat-label">Professeurs</div><div class="stat-value">{{ stats.profs or 0 }}</div></div>
+  <div class="stat green"><div class="stat-label">Classes</div><div class="stat-value">{{ stats.classes or 0 }}</div></div>
+  <div class="stat purple"><div class="stat-label">Matieres</div><div class="stat-value">{{ stats.matieres or 0 }}</div></div>
+  <div class="stat amber"><div class="stat-label">Absences</div><div class="stat-value">{{ stats.absences or 0 }}</div></div>
+  <div class="stat teal"><div class="stat-label">Departements</div><div class="stat-value">{{ stats.departements or 0 }}</div></div>
+</div>
+<div class="card">
+  <div class="card-title">Acces rapide</div>
+  <div class="btn-group">
+    <a href="/admin/profs/ajouter" class="btn btn-primary">+ Professeur</a>
+    <a href="/admin/etudiants" class="btn btn-primary">+ Etudiant</a>
+    <a href="/admin/departements" class="btn btn-secondary">Departements</a>
+    <a href="/admin/classes" class="btn btn-secondary">Classes</a>
+    <a href="/admin/matieres" class="btn btn-secondary">Matieres</a>
+    <a href="/admin/edt" class="btn btn-secondary">Emploi du temps</a>
+    <a href="/admin/absences" class="btn btn-secondary">Absences</a>
+    <a href="http://files.isi-monitor.local:8082" target="_blank" class="btn btn-secondary">Portail PDF</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport Prof — {{ prof.prenom }} {{ prof.nom }}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:white;padding:20px;font-size:12px}
+.print-btn{display:block;margin:0 auto 20px;padding:10px 28px;background:#6d28d9;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+@media print{.print-btn{display:none}}
+.doc-header{display:flex;justify-content:space-between;border-bottom:3px solid #6d28d9;padding-bottom:14px;margin-bottom:18px}
+.school h2{font-size:18px;font-weight:800;color:#6d28d9}.school p{font-size:11px;color:#555;margin-top:2px}
+.info{text-align:right}.info h1{font-size:16px;font-weight:700}
+.prof-box{background:#f5f3ff;border-radius:10px;padding:16px;margin-bottom:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pi .lbl{font-size:10px;color:#888;text-transform:uppercase}.pi .val{font-size:13px;font-weight:700;color:#1a1a2e;margin-top:2px}
+.section-title{font-size:13px;font-weight:800;color:#6d28d9;margin:14px 0 8px;padding-bottom:6px;border-bottom:2px solid #f5f3ff}
+table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
+th{background:#6d28d9;color:white;padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase}
+td{padding:7px 10px;border-bottom:1px solid #f0f0f0}
+tr:nth-child(even) td{background:#fafafa}
+.edt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.edt-day{background:#f8f9fa;border-radius:8px;padding:10px}
+.edt-day-title{font-weight:700;font-size:11px;color:#6d28d9;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e9d5ff}
+.slot{font-size:10px;margin-bottom:5px;padding:5px;background:white;border-left:2px solid #a78bfa;border-radius:4px}
+.footer{text-align:center;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px;margin-top:16px}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">Imprimer / Sauvegarder en PDF</button>
+<div class="doc-header">
+  <div class="school"><h2>ISI Keur Massar</h2><p>Institut Superieur d'Informatique</p></div>
+  <div class="info"><h1>Rapport professeur</h1><p>Annee academique 2024-2025</p></div>
+</div>
+<div class="prof-box">
+  <div class="pi"><div class="lbl">Nom complet</div><div class="val">{{ prof.prenom }} {{ prof.nom }}</div></div>
+  <div class="pi"><div class="lbl">Grade</div><div class="val">{{ prof.grade or '—' }}</div></div>
+  <div class="pi"><div class="lbl">Departement</div><div class="val">{{ prof.dept_nom or '—' }}</div></div>
+  <div class="pi"><div class="lbl">Specialite</div><div class="val">{{ prof.specialite or '—' }}</div></div>
+  <div class="pi"><div class="lbl">Email</div><div class="val">{{ prof.email or '—' }}</div></div>
+  <div class="pi"><div class="lbl">Telephone</div><div class="val">{{ prof.telephone or '—' }}</div></div>
+</div>
+<div class="section-title">Matieres enseignees ({{ prof.matieres|length if prof.matieres else 0 }})</div>
+{% if prof.matieres %}
+<table>
+  <thead><tr><th>Matiere</th><th>Code</th><th>Classe</th><th>Credits</th><th>Semestre</th></tr></thead>
+  <tbody>{% for m in prof.matieres %}<tr>
+    <td><strong>{{ m.nom }}</strong></td>
+    <td><span style="font-family:monospace">{{ m.code }}</span></td>
+    <td>{{ m.classe_nom }}</td>
+    <td>{{ m.credits }}</td>
+    <td>S{{ m.semestre }}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% endif %}
+<div class="section-title">Emploi du temps</div>
+{% set jours = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'] %}
+<div class="edt-grid">
+  {% for jour in jours %}
+  <div class="edt-day">
+    <div class="edt-day-title">{{ jour }}</div>
+    {% for s in (prof.emploi_du_temps or []) if s.jour==jour %}
+    <div class="slot">
+      <strong>{{ s.matiere_nom }}</strong><br>
+      {{ s.heure_debut[:5] if s.heure_debut else '' }} – {{ s.heure_fin[:5] if s.heure_fin else '' }}<br>
+      {{ s.classe_nom }} | {{ s.salle or '' }}
+    </div>
+    {% else %}<div style="color:#ccc;font-size:10px;text-align:center;padding:6px">—</div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+<div class="footer">Rapport genere par ISI Monitor — ISI Keur Massar — 2024-2025</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% extends "shared/base.html" %}
+{% block title %}Mon profil{% endblock %}
+{% block page_title %}Mon profil{% endblock %}
+{% block breadcrumb %}Mon espace / Profil{% endblock %}
+{% block content %}
+{% set etu = user.etudiant or {} %}
+<div class="card">
+  <div class="profile-card">
+    <div class="avatar av-etu">{{ user.prenom[0] if user.prenom else 'E' }}</div>
+    <div>
+      <h3 style="font-size:20px;font-weight:700">{{ user.prenom }} {{ user.nom }}</h3>
+      <p style="color:#888;font-size:13px">{{ etu.classe_nom or '—' }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-title">Informations <span style="font-size:12px;color:#aaa;font-weight:400">(lecture seule)</span></div>
+  <div class="info-grid">
+    <div class="info-item"><div class="lbl">Matricule</div><div class="val"><span class="mat">{{ etu.matricule or '—' }}</span></div></div>
+    <div class="info-item"><div class="lbl">Nom complet</div><div class="val">{{ user.prenom }} {{ user.nom }}</div></div>
+    <div class="info-item"><div class="lbl">Email</div><div class="val">{{ user.email or '—' }}</div></div>
+    <div class="info-item"><div class="lbl">Telephone</div><div class="val">{{ user.telephone or '—' }}</div></div>
+    <div class="info-item"><div class="lbl">Classe</div><div class="val">{{ etu.classe_nom or '—' }}</div></div>
+    <div class="info-item"><div class="lbl">Filiere</div><div class="val">{{ etu.filiere_nom or '—' }} ({{ etu.filiere_code or '—' }})</div></div>
+    <div class="info-item"><div class="lbl">Niveau</div><div class="val">{{ etu.niveau_nom or '—' }}</div></div>
+    <div class="info-item"><div class="lbl">Departement</div><div class="val">{{ etu.dept_nom or '—' }}</div></div>
+    <div class="info-item"><div class="lbl">Annee inscription</div><div class="val">{{ etu.annee_inscription or '—' }}</div></div>
+  </div>
+  <a href="/change-password" class="btn btn-secondary btn-sm" style="margin-top:14px">Changer mot de passe</a>
+</div>
+{% endblock %}

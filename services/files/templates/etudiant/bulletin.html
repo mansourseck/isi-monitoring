@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Bulletin S{{ semestre }} — {{ user.prenom }} {{ user.nom }}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:white;padding:20px}
+.no-print{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+@media print{.no-print{display:none!important}}
+.btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;text-decoration:none;display:inline-block}
+.btn-primary{background:#0f3460;color:white}
+.btn-secondary{background:#f3f4f6;color:#374151}
+.sem-btn{padding:6px 14px;background:#f3f4f6;color:#374151;border-radius:6px;text-decoration:none;font-size:12px;font-weight:500}
+.sem-btn.active{background:#0f3460;color:white}
+.doc-header{display:flex;justify-content:space-between;border-bottom:3px solid #0f3460;padding-bottom:14px;margin-bottom:18px}
+.school h2{font-size:18px;font-weight:800;color:#0f3460}.school p{font-size:11px;color:#555;margin-top:2px}
+.info{text-align:right}.info h1{font-size:16px;font-weight:700}.info p{font-size:11px;color:#888;margin-top:2px}
+.etu-info{background:#f0f4f8;border-radius:10px;padding:16px;margin-bottom:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.ei .lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px}.ei .val{font-size:13px;font-weight:700;color:#1a1a2e;margin-top:2px}
+.moy-section{background:linear-gradient(135deg,#0f3460,#16213e);color:white;border-radius:12px;padding:20px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.ms .lbl{font-size:11px;color:#888}.ms .val{font-size:32px;font-weight:800;margin-top:4px}
+.ms .val.h{color:#4ade80}.ms .val.m{color:#fbbf24}.ms .val.l{color:#f87171}
+.credits-bar{background:#ffffff22;border-radius:20px;height:8px;margin-top:6px;overflow:hidden}
+.credits-fill{height:100%;border-radius:20px;background:#4ade80}
+.statut{display:inline-block;padding:5px 18px;border-radius:20px;font-size:13px;font-weight:700;margin-top:10px}
+.admis{background:#dcfce722;color:#4ade80;border:1px solid #4ade8044}
+.echec{background:#fee2e222;color:#f87171;border:1px solid #f8717144}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+th{background:#0f3460;color:white;padding:9px 12px;text-align:left;font-size:11px}
+td{padding:9px 12px;border-bottom:1px solid #f0f0f0}
+tr:nth-child(even) td{background:#fafafa}
+.nh{color:#16a34a;font-weight:700}.nm{color:#d97706;font-weight:700}.nl{color:#dc2626;font-weight:700}
+.section-title{font-size:14px;font-weight:800;color:#0f3460;margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid #f0f4f8}
+.edt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.edt-day{background:#f8f9fa;border-radius:8px;padding:10px}
+.edt-day-title{font-weight:700;font-size:11px;color:#0f3460;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #dbeafe}
+.slot{font-size:10px;margin-bottom:5px;padding:5px;background:white;border-left:2px solid #60a5fa;border-radius:4px}
+.footer{text-align:center;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="no-print">
+  <button onclick="window.print()" class="btn btn-primary">Imprimer / Sauvegarder PDF</button>
+  <a href="/etudiant" class="btn btn-secondary">Retour</a>
+  <a href="/etudiant/bulletin/1" class="sem-btn {% if semestre==1 %}active{% endif %}">Semestre 1</a>
+  <a href="/etudiant/bulletin/2" class="sem-btn {% if semestre==2 %}active{% endif %}">Semestre 2</a>
+</div>
+
+<div class="doc-header">
+  <div class="school"><h2>ISI Keur Massar</h2><p>Institut Superieur d'Informatique — Keur Massar, Dakar, Senegal</p></div>
+  <div class="info"><h1>Bulletin de notes — Semestre {{ semestre }}</h1><p>Annee academique 2024-2025</p></div>
+</div>
+
+<div class="etu-info">
+  <div class="ei"><div class="lbl">Matricule</div><div class="val">{{ etu.matricule or '—' }}</div></div>
+  <div class="ei"><div class="lbl">Nom complet</div><div class="val">{{ user.prenom }} {{ user.nom }}</div></div>
+  <div class="ei"><div class="lbl">Email</div><div class="val">{{ user.email or '—' }}</div></div>
+  <div class="ei"><div class="lbl">Classe</div><div class="val">{{ etu.classe_nom or '—' }}</div></div>
+  <div class="ei"><div class="lbl">Filiere</div><div class="val">{{ etu.filiere_nom or '—' }} ({{ etu.filiere_code or '—' }})</div></div>
+  <div class="ei"><div class="lbl">Niveau</div><div class="val">{{ etu.niveau_nom or '—' }}</div></div>
+  <div class="ei"><div class="lbl">Departement</div><div class="val">{{ etu.dept_nom or '—' }}</div></div>
+</div>
+
+{% set sd = bulletin.get('s'+semestre|string, {}) %}
+{% set moy = sd.get('moyenne', 0) or 0 %}
+{% set cred = sd.get('credits_valides', 0) or 0 %}
+<div class="moy-section">
+  <div class="ms">
+    <div class="lbl">Moyenne generale</div>
+    <div class="val {% if moy >= 14 %}h{% elif moy >= 10 %}m{% else %}l{% endif %}">{{ moy }}<span style="font-size:16px">/20</span></div>
+    <div class="statut {% if moy >= 10 %}admis{% else %}echec{% endif %}">{% if moy >= 10 %}ADMIS(E){% else %}EN ECHEC{% endif %}</div>
+  </div>
+  <div class="ms">
+    <div class="lbl">Credits valides</div>
+    <div class="val" style="color:{% if cred >= 60 %}#4ade80{% else %}#fbbf24{% endif %}">{{ cred }}<span style="font-size:16px">/60</span></div>
+    <div class="credits-bar"><div class="credits-fill" style="width:{{ [cred/60*100,100]|min }}%"></div></div>
+    <div class="statut {% if cred >= 60 %}admis{% else %}echec{% endif %}" style="margin-top:8px">{% if cred >= 60 %}VALIDE{% else %}{{ cred }}/60 credits{% endif %}</div>
+  </div>
+  <div class="ms">
+    <div class="lbl">Absences ce semestre</div>
+    <div class="val" style="color:{% if absences|length > 5 %}#f87171{% else %}#fbbf24{% endif %}">{{ absences|length }}</div>
+    <div style="font-size:11px;color:#888;margin-top:6px">{% for a in absences if not a.justifiee %}Non justif.{% endfor %}</div>
+  </div>
+</div>
+
+<div class="section-title">Notes du Semestre {{ semestre }}</div>
+<table>
+  <thead><tr><th>Matiere</th><th>Code</th><th>Credits</th><th>Coeff</th><th>Devoir (40%)</th><th>Examen (60%)</th><th>Note finale</th><th>Statut</th></tr></thead>
+  <tbody>
+  {% for n in notes %}<tr>
+    <td><strong>{{ n.matiere_nom }}</strong></td>
+    <td style="font-family:monospace;font-size:10px">{{ n.matiere_code }}</td>
+    <td>{{ n.credits }}</td>
+    <td>{{ n.coefficient }}</td>
+    <td>{{ n.note_devoir or '—' }}/20</td>
+    <td>{{ n.note_examen or '—' }}/20</td>
+    <td class="{% if n.note_finale and n.note_finale >= 14 %}nh{% elif n.note_finale and n.note_finale >= 10 %}nm{% elif n.note_finale %}nl{% endif %}">
+      {{ n.note_finale or '—' }}/20
+    </td>
+    <td>{% if n.note_finale %}
+      {% if n.note_finale >= 10 %}<span style="color:#16a34a;font-weight:700">Valide</span>
+      {% else %}<span style="color:#dc2626;font-weight:700">Echec</span>{% endif %}
+    {% else %}<span style="color:#888">En attente</span>{% endif %}</td>
+  </tr>{% else %}<tr><td colspan="8" style="text-align:center;color:#aaa;padding:16px">Aucune note enregistree</td></tr>{% endfor %}
+  </tbody>
+</table>
+
+{% if absences %}
+<div class="section-title">Absences</div>
+<table>
+  <thead><tr><th>Matiere</th><th>Date</th><th>Justifiee</th><th>Motif</th></tr></thead>
+  <tbody>{% for a in absences %}<tr>
+    <td>{{ a.matiere_nom }}</td><td>{{ a.date_absence }}</td>
+    <td>{% if a.justifiee %}<span style="color:#16a34a;font-weight:700">Oui</span>{% else %}<span style="color:#dc2626;font-weight:700">Non</span>{% endif %}</td>
+    <td>{{ a.motif or '—' }}</td>
+  </tr>{% endfor %}</tbody>
+</table>
+{% endif %}
+
+<div class="section-title">Emploi du temps — Semestre {{ semestre }}</div>
+<div class="edt-grid">
+  {% for jour in jours %}
+  <div class="edt-day">
+    <div class="edt-day-title">{{ jour }}</div>
+    {% for s in edt.get(jour, []) %}
+    <div class="slot">
+      <strong>{{ s.matiere_nom }}</strong><br>
+      {{ s.heure_debut[:5] if s.heure_debut else '' }} – {{ s.heure_fin[:5] if s.heure_fin else '' }}<br>
+      {{ s.prof_prenom or '' }} {{ s.prof_nom or '' }} | {{ s.salle or '' }}
+    </div>
+    {% else %}<div style="color:#ccc;font-size:10px;text-align:center;padding:8px">—</div>{% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="footer">Bulletin genere par ISI Monitor — ISI Keur Massar — Annee academique 2024-2025</div>
+</body>
+</html>

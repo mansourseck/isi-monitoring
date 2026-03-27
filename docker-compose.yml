@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: postgres:15-alpine
+    container_name: isi_db
+    environment:
+      POSTGRES_DB: isi_monitor
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - isi_net
+    restart: unless-stopped
+
+  service_web:
+    build: ./services/web
+    container_name: isi_web
+    ports:
+      - "8081:8081"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/isi_monitor
+    depends_on:
+      - db
+    networks:
+      - isi_net
+    restart: unless-stopped
+
+  service_files:
+    build: ./services/files
+    container_name: isi_files
+    ports:
+      - "8082:8082"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/isi_monitor
+    depends_on:
+      - db
+    networks:
+      - isi_net
+    restart: unless-stopped
+
+  flask_app:
+    build: ./flask_app
+    container_name: isi_dashboard
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/isi_monitor
+    depends_on:
+      - db
+    networks:
+      - isi_net
+    restart: unless-stopped
+
+  worker:
+    build: ./worker
+    container_name: isi_worker
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/isi_monitor
+      CHECK_INTERVAL: "30"
+    depends_on:
+      - db
+    networks:
+      - isi_net
+    restart: unless-stopped
+
+networks:
+  isi_net:
+    driver: bridge
+
+volumes:
+  pgdata:

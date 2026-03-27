@@ -1,0 +1,36 @@
+{% extends "shared/base.html" %}
+{% block title %}Dashboard Professeur{% endblock %}
+{% block page_title %}Bonjour, {{ user.prenom }}{% endblock %}
+{% block breadcrumb %}Mon espace{% endblock %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat"><div class="stat-label">Mes cours</div><div class="stat-value">{{ prof.matieres|length if prof.matieres else 0 }}</div></div>
+  <div class="stat blue"><div class="stat-label">Departement</div><div class="stat-value" style="font-size:18px">{{ prof.dept_code or '—' }}</div></div>
+  <div class="stat purple"><div class="stat-label">Grade</div><div class="stat-value" style="font-size:16px">{{ prof.grade or '—' }}</div></div>
+  <div class="stat green"><div class="stat-label">Creneaux EDT</div><div class="stat-value">{{ prof.emploi_du_temps|length if prof.emploi_du_temps else 0 }}</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+  <div class="card">
+    <div class="card-title">Mes matieres</div>
+    {% if prof.matieres %}
+    <table><thead><tr><th>Matiere</th><th>Classe</th><th>Credits</th><th>S</th></tr></thead>
+    <tbody>{% for m in prof.matieres %}<tr>
+      <td><strong>{{ m.nom }}</strong></td>
+      <td><span class="badge badge-blue">{{ m.classe_nom }}</span></td>
+      <td>{{ m.credits }}</td>
+      <td><span class="badge badge-amber">S{{ m.semestre }}</span></td>
+    </tr>{% endfor %}</tbody></table>
+    {% else %}<p style="color:#aaa;font-size:13px;text-align:center;padding:20px">Aucun cours affecte</p>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title">Acces rapide</div>
+    <div class="btn-group">
+      <a href="/prof/notes" class="btn btn-primary">Saisir notes</a>
+      <a href="/prof/absences" class="btn btn-primary">Absences</a>
+      <a href="/prof/etudiants" class="btn btn-secondary">Mes etudiants</a>
+      <a href="/prof/edt" class="btn btn-secondary">Mon EDT</a>
+      <a href="http://files.isi-monitor.local:8082" target="_blank" class="btn btn-secondary">Rapports PDF</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

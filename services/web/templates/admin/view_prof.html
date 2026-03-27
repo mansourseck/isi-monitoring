@@ -1,0 +1,90 @@
+{% extends "shared/base.html" %}
+{% block title %}Profil professeur{% endblock %}
+{% block page_title %}Profil professeur{% endblock %}
+{% block breadcrumb %}Professeurs / {{ prof.prenom }} {{ prof.nom }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="profile-card">
+    <div class="avatar av-prof">{{ prof.prenom[0] if prof.prenom else 'P' }}</div>
+    <div>
+      <h3 style="font-size:18px;font-weight:700">{{ prof.prenom }} {{ prof.nom }}</h3>
+      <p style="color:#888;font-size:13px;margin-top:2px">{{ prof.grade or 'Professeur' }}</p>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <span class="badge badge-purple">{{ prof.dept_code or '—' }}</span>
+        <span class="badge badge-gray">{{ prof.username }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+  <div class="card">
+    <div class="card-title">Informations</div>
+    <div class="info-grid">
+      <div class="info-item"><div class="lbl">Email</div><div class="val">{{ prof.email or '—' }}</div></div>
+      <div class="info-item"><div class="lbl">Telephone</div><div class="val">{{ prof.telephone or '—' }}</div></div>
+      <div class="info-item"><div class="lbl">Departement</div><div class="val">{{ prof.dept_nom or '—' }}</div></div>
+      <div class="info-item"><div class="lbl">Specialite</div><div class="val">{{ prof.specialite or '—' }}</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Modifier</div>
+    <form method="POST" action="/admin/profs/{{ prof.prof_id }}/modifier">
+      <div class="fg" style="margin-bottom:10px"><label>Nom</label><input type="text" name="nom" value="{{ prof.nom }}" required></div>
+      <div class="fg" style="margin-bottom:10px"><label>Prenom</label><input type="text" name="prenom" value="{{ prof.prenom }}" required></div>
+      <div class="fg" style="margin-bottom:10px"><label>Email</label><input type="email" name="email" value="{{ prof.email or '' }}"></div>
+      <div class="fg" style="margin-bottom:10px"><label>Telephone</label><input type="text" name="telephone" value="{{ prof.telephone or '' }}"></div>
+      <div class="fg" style="margin-bottom:10px"><label>Departement</label>
+        <select name="departement_id">
+          <option value="">-- Choisir --</option>
+          {% for d in depts %}<option value="{{ d.id }}" {% if prof.dept_id==d.id %}selected{% endif %}>{{ d.nom }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:10px"><label>Grade</label>
+        <select name="grade">
+          {% for g in ['Assistant','Maitre assistant','Maitre de conferences','Professeur','Vacataire'] %}
+          <option {% if prof.grade==g %}selected{% endif %}>{{ g }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:10px"><label>Specialite</label><input type="text" name="specialite" value="{{ prof.specialite or '' }}"></div>
+      <div class="fg" style="margin-bottom:10px">
+        <label>Matieres</label>
+        <select name="matiere_ids" multiple size="6" style="border:1px solid #ddd;border-radius:8px;padding:6px">
+          {% set prof_mat_ids = prof.matieres | map(attribute='id') | list %}
+          {% for m in matieres %}<option value="{{ m.id }}" {% if m.id in prof_mat_ids %}selected{% endif %}>{{ m.nom }} — S{{ m.semestre }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Sauvegarder</button>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="card-title">Matieres enseignees ({{ prof.matieres|length }})</div>
+  <table><thead><tr><th>Matiere</th><th>Code</th><th>Classe</th><th>Credits</th><th>Semestre</th></tr></thead>
+  <tbody>{% for m in prof.matieres %}<tr>
+    <td>{{ m.nom }}</td><td><span class="mat">{{ m.code }}</span></td>
+    <td><span class="badge badge-blue">{{ m.classe_nom }}</span></td>
+    <td><span class="badge badge-teal">{{ m.credits }} cr</span></td>
+    <td><span class="badge badge-amber">S{{ m.semestre }}</span></td>
+  </tr>{% else %}<tr><td colspan="5" style="color:#aaa;text-align:center;padding:16px">Aucune matiere affectee</td></tr>{% endfor %}</tbody></table>
+</div>
+<div class="card">
+  <div class="card-title">Emploi du temps</div>
+  <div class="edt-grid">
+    {% set jours = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'] %}
+    {% for jour in jours %}
+    <div class="edt-day">
+      <div class="edt-day-title">{{ jour }}</div>
+      {% for s in prof.emploi_du_temps if s.jour==jour %}
+      <div class="edt-slot">
+        <div class="mat-name">{{ s.matiere_nom }}</div>
+        <div class="time">{{ s.heure_debut[:5] if s.heure_debut else '' }} – {{ s.heure_fin[:5] if s.heure_fin else '' }}</div>
+        <div class="prof">{{ s.classe_nom }} | {{ s.salle or '' }}</div>
+      </div>
+      {% else %}<div style="color:#ddd;font-size:12px;text-align:center;padding:8px">—</div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

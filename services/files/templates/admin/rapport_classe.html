@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport {{ classe.nom }}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:white;color:#000;padding:20px;font-size:12px}
+.print-btn{display:block;margin:0 auto 20px;padding:10px 28px;background:#0f3460;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+@media print{.print-btn{display:none}}
+.doc-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0f3460;padding-bottom:14px;margin-bottom:18px}
+.school h2{font-size:18px;font-weight:800;color:#0f3460}
+.school p{font-size:11px;color:#555;margin-top:2px}
+.report-info{text-align:right}
+.report-info h1{font-size:16px;font-weight:700;color:#1a1a2e}
+.report-info p{font-size:11px;color:#888;margin-top:2px}
+.classe-info{background:#f0f4f8;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;gap:24px}
+.ci .lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px}
+.ci .val{font-size:13px;font-weight:700;color:#1a1a2e;margin-top:2px}
+.etu-block{border:1px solid #eee;border-radius:8px;padding:14px;margin-bottom:12px;break-inside:avoid}
+.etu-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.etu-name{font-size:14px;font-weight:700}
+.etu-meta{font-size:11px;color:#888;margin-top:2px}
+.moy-badge{padding:6px 14px;border-radius:8px;font-size:14px;font-weight:800;text-align:center;min-width:80px}
+.moy-h{background:#dcfce7;color:#166534}.moy-m{background:#fef3c7;color:#92400e}.moy-l{background:#fee2e2;color:#991b1b}
+table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px}
+th{background:#f8f9fa;padding:6px 8px;text-align:left;border-bottom:1px solid #eee;color:#666;text-transform:uppercase;font-size:10px}
+td{padding:6px 8px;border-bottom:1px solid #f5f5f5}
+.nh{color:#16a34a;font-weight:700}.nm{color:#d97706;font-weight:700}.nl{color:#dc2626;font-weight:700}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.sum-item{background:#f8f9fa;border-radius:6px;padding:6px;text-align:center}
+.sum-item .sv{font-size:14px;font-weight:700;color:#0f3460}
+.sum-item .sl{font-size:9px;color:#aaa;text-transform:uppercase}
+.credits-bar{background:#f3f4f6;border-radius:20px;height:5px;margin-top:3px;overflow:hidden}
+.credits-fill{height:100%;border-radius:20px;background:#22c55e}
+.footer{text-align:center;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px;margin-top:16px}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">Imprimer / Sauvegarder en PDF</button>
+
+<div class="doc-header">
+  <div class="school">
+    <h2>ISI Keur Massar</h2>
+    <p>Institut Superieur d'Informatique — Keur Massar, Dakar</p>
+  </div>
+  <div class="report-info">
+    <h1>Rapport de classe</h1>
+    <p>Annee academique 2024-2025</p>
+    <p>Genere le {% now "d/m/Y" %}</p>
+  </div>
+</div>
+
+<div class="classe-info">
+  <div class="ci"><div class="lbl">Classe</div><div class="val">{{ classe.nom }}</div></div>
+  <div class="ci"><div class="lbl">Filiere</div><div class="val">{{ classe.filiere_nom or '—' }}</div></div>
+  <div class="ci"><div class="lbl">Niveau</div><div class="val">{{ classe.niveau_nom or '—' }}</div></div>
+  <div class="ci"><div class="lbl">Departement</div><div class="val">{{ classe.dept_nom or '—' }}</div></div>
+  <div class="ci"><div class="lbl">Etudiants</div><div class="val">{{ data|length }}</div></div>
+</div>
+
+{% for d in data %}
+{% set e = d.etudiant %}
+{% set b = d.bulletin %}
+{% set s1 = b.get('s1', {}) %}
+{% set s2 = b.get('s2', {}) %}
+{% set moy_gen = ((s1.get('moyenne',0) or 0) + (s2.get('moyenne',0) or 0)) / 2 if s1 or s2 else 0 %}
+<div class="etu-block">
+  <div class="etu-header">
+    <div>
+      <div class="etu-name">{{ e.prenom }} {{ e.nom }}</div>
+      <div class="etu-meta">{{ e.matricule }} — {{ e.absences or d.nb_absences }} absence(s)</div>
+    </div>
+    <div class="moy-badge {% if moy_gen >= 14 %}moy-h{% elif moy_gen >= 10 %}moy-m{% else %}moy-l{% endif %}">
+      {{ "%.2f"|format(moy_gen) }}/20
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    {% for sem, notes_key, sd in [(1, 'notes_s1', s1), (2, 'notes_s2', s2)] %}
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#0f3460;margin-bottom:6px">Semestre {{ sem }}</div>
+      {% set notes = d.get(notes_key, []) %}
+      {% if notes %}
+      <table>
+        <thead><tr><th>Matiere</th><th>Dev</th><th>Exam</th><th>Finale</th><th>Cr</th></tr></thead>
+        <tbody>{% for n in notes %}<tr>
+          <td>{{ n.matiere_nom[:20] }}</td>
+          <td>{{ n.note_devoir or '—' }}</td>
+          <td>{{ n.note_examen or '—' }}</td>
+          <td class="{% if n.note_finale and n.note_finale >= 14 %}nh{% elif n.note_finale and n.note_finale >= 10 %}nm{% elif n.note_finale %}nl{% endif %}">{{ n.note_finale or '—' }}</td>
+          <td>{{ n.credits }}</td>
+        </tr>{% endfor %}</tbody>
+      </table>
+      {% if sd %}
+      <div style="font-size:11px;margin-top:6px;display:flex;justify-content:space-between">
+        <span>Moy: <strong class="{% if sd.moyenne >= 10 %}nh{% else %}nl{% endif %}">{{ sd.moyenne }}/20</strong></span>
+        <span>Credits: {{ sd.credits_valides }}/60</span>
+        <span>{% if sd.valide %}<span style="color:#16a34a;font-weight:700">VALIDE</span>{% else %}<span style="color:#dc2626">EN COURS</span>{% endif %}</span>
+      </div>
+      {% endif %}
+      {% else %}
+      <p style="color:#aaa;font-size:11px;text-align:center;padding:8px">Aucune note</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+<div class="footer">Rapport genere par ISI Monitor — ISI Keur Massar — Annee academique 2024-2025</div>
+</body>
+</html>

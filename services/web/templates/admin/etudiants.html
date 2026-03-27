@@ -1,0 +1,54 @@
+{% extends "shared/base.html" %}
+{% block title %}Etudiants{% endblock %}
+{% block page_title %}Etudiants{% endblock %}
+{% block breadcrumb %}Scolarite / Etudiants{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Ajouter un etudiant</div>
+  <form method="POST" action="/admin/etudiants/ajouter">
+    <div class="form-row">
+      <div class="fg"><label>Username</label><input type="text" name="username" placeholder="fndiaye" required></div>
+      <div class="fg"><label>Nom</label><input type="text" name="nom" placeholder="Ndiaye" required></div>
+      <div class="fg"><label>Prenom</label><input type="text" name="prenom" placeholder="Fatou" required></div>
+      <div class="fg"><label>Email</label><input type="email" name="email" placeholder="fndiaye@isi.sn"></div>
+      <div class="fg"><label>Telephone</label><input type="text" name="telephone" placeholder="+221 77..."></div>
+      <div class="fg"><label>Classe</label>
+        <select name="classe_id">
+          <option value="">-- Choisir --</option>
+          {% for c in classes %}<option value="{{ c.id }}" {% if classe_id==c.id|string %}selected{% endif %}>{{ c.nom }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg"><label>&nbsp;</label><button type="submit" class="btn btn-primary">Ajouter</button></div>
+    </div>
+    <p style="font-size:11px;color:#aaa;margin-top:6px">Matricule auto-genere. Mot de passe initial: etudiant123 (a changer)</p>
+  </form>
+</div>
+<div class="card">
+  <div class="card-title">Etudiants <span class="badge badge-blue">{{ etudiants|length }}</span></div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <form method="GET" class="search-bar" style="flex:1;min-width:200px;margin:0">
+      <input type="text" name="search" value="{{ search }}" placeholder="Rechercher nom, prenom, matricule...">
+      {% if classe_id %}<input type="hidden" name="classe_id" value="{{ classe_id }}">{% endif %}
+      <button type="submit" class="btn btn-primary btn-sm">Chercher</button>
+    </form>
+    <form method="GET">
+      <select name="classe_id" onchange="this.form.submit()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+        <option value="">Toutes les classes</option>
+        {% for c in classes %}<option value="{{ c.id }}" {% if classe_id==c.id|string %}selected{% endif %}>{{ c.nom }}</option>{% endfor %}
+      </select>
+    </form>
+  </div>
+  <div class="table-wrap">
+  <table><thead><tr><th>Matricule</th><th>Nom</th><th>Email</th><th>Classe</th><th>Filiere</th><th>Action</th></tr></thead>
+  <tbody>{% for e in etudiants %}<tr>
+    <td><span class="mat">{{ e.matricule }}</span></td>
+    <td><strong>{{ e.prenom }} {{ e.nom }}</strong></td>
+    <td>{{ e.email or '—' }}</td>
+    <td><span class="badge badge-blue">{{ e.classe_nom or '—' }}</span></td>
+    <td><span class="badge badge-teal">{{ e.filiere_code or '—' }}</span></td>
+    <td><a href="/admin/etudiants/{{ e.etudiant_id }}/supprimer" onclick="return confirm('Supprimer ?')" class="btn btn-danger btn-sm">Supprimer</a></td>
+  </tr>{% else %}<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px">Aucun etudiant</td></tr>{% endfor %}
+  </tbody></table>
+  </div>
+</div>
+{% endblock %}

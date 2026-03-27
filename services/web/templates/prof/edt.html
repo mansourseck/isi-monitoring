@@ -1,0 +1,27 @@
+{% extends "shared/base.html" %}
+{% block title %}Mon emploi du temps{% endblock %}
+{% block page_title %}Mon emploi du temps{% endblock %}
+{% block breadcrumb %}Mon espace / EDT{% endblock %}
+{% block content %}
+<div class="sem-tabs">
+  <a href="?semestre=1" class="sem-tab {% if semestre=='1' %}active{% endif %}">Semestre 1</a>
+  <a href="?semestre=2" class="sem-tab {% if semestre=='2' %}active{% endif %}">Semestre 2</a>
+</div>
+<div class="edt-grid">
+  {% for jour in jours %}
+  <div class="edt-day">
+    <div class="edt-day-title">{{ jour }}</div>
+    {% for s in edt.get(jour, []) %}
+    <div class="edt-slot">
+      <div class="mat-name">{{ s.matiere_nom }}</div>
+      <div class="time">{{ s.heure_debut[:5] if s.heure_debut else '' }} – {{ s.heure_fin[:5] if s.heure_fin else '' }}</div>
+      <div class="prof">{{ s.classe_nom }} | {{ s.salle or '' }}</div>
+    </div>
+    {% else %}<div style="color:#ddd;font-size:12px;text-align:center;padding:8px">—</div>{% endfor %}
+  </div>
+  {% endfor %}
+</div>
+<div style="margin-top:16px">
+  <a href="http://files.isi-monitor.local:8082" target="_blank" class="btn btn-secondary">Telecharger mon EDT (PDF)</a>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Mes bulletins{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Mon espace etudiant</div>
+  <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+    <div>
+      <div style="font-size:24px;font-weight:800;color:#1a1a2e">{{ user.prenom }} {{ user.nom }}</div>
+      <div style="font-size:12px;color:#888;margin-top:4px">
+        <span style="font-family:monospace;background:#f3f4f6;padding:2px 8px;border-radius:4px;font-size:11px">{{ etu.matricule or '—' }}</span>
+        — {{ etu.classe_nom or '—' }} — {{ etu.filiere_nom or '—' }}
+      </div>
+    </div>
+  </div>
+</div>
+{% if bulletin %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+  {% for s in [1,2] %}
+  {% set sd = bulletin.get('s'+s|string, {}) %}
+  <div class="doc-card" style="border-top-color:{% if sd.get('valide') %}#22c55e{% else %}#0f3460{% endif %}">
+    <h3>Semestre {{ s }}</h3>
+    <div style="margin:12px 0">
+      <div style="font-size:36px;font-weight:800;color:{% if sd.get('moyenne',0) >= 14 %}#16a34a{% elif sd.get('moyenne',0) >= 10 %}#d97706{% else %}#dc2626{% endif %}">
+        {{ sd.get('moyenne','—') }}<span style="font-size:16px;font-weight:400">/20</span>
+      </div>
+      <div style="font-size:11px;color:#888;margin-top:4px">{{ sd.get('credits_valides',0) }}/60 credits</div>
+      <div class="credits-bar" style="margin-top:6px"><div class="credits-fill" style="width:{{ [sd.get('credits_valides',0)/60*100,100]|min }}%"></div></div>
+    </div>
+    <div style="margin-bottom:12px">
+      {% if sd.get('valide') %}<span class="badge badge-green">Semestre valide</span>
+      {% elif sd.get('moyenne') %}<span class="badge badge-gray">En cours</span>
+      {% else %}<span class="badge badge-gray">Pas encore de notes</span>{% endif %}
+    </div>
+    <div class="btn-group">
+      <a href="/etudiant/bulletin/{{ s }}" class="btn btn-primary btn-sm">Voir bulletin</a>
+      <a href="/etudiant/bulletin/{{ s }}" target="_blank" class="btn btn-secondary btn-sm">Imprimer PDF</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

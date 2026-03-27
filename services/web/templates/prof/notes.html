@@ -1,0 +1,65 @@
+{% extends "shared/base.html" %}
+{% block title %}Saisir notes{% endblock %}
+{% block page_title %}Saisie des notes{% endblock %}
+{% block breadcrumb %}Mes classes / Notes{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Saisir une note <small style="font-size:12px;color:#aaa;font-weight:400">(Devoir 40% + Examen 60% = Note finale)</small></div>
+  <form method="POST" action="/prof/notes">
+    <div class="form-row">
+      <div class="fg"><label>Etudiant</label>
+        <select name="etudiant_id" required>
+          <option value="">-- Choisir --</option>
+          {% for e in etudiants %}<option value="{{ e.etudiant_id }}">{{ e.prenom }} {{ e.nom }} ({{ e.classe_nom }})</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg"><label>Matiere (mes cours)</label>
+        <select name="matiere_id" required>
+          <option value="">-- Choisir --</option>
+          {% for m in matieres %}<option value="{{ m.id }}">{{ m.nom }} — {{ m.classe_nom }} — S{{ m.semestre }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg"><label>Semestre</label>
+        <select name="semestre">
+          <option value="1">Semestre 1</option>
+          <option value="2">Semestre 2</option>
+        </select>
+      </div>
+      <div class="fg"><label>Note devoir /20</label><input type="number" name="note_devoir" min="0" max="20" step="0.25" placeholder="12.5"></div>
+      <div class="fg"><label>Note examen /20</label><input type="number" name="note_examen" min="0" max="20" step="0.25" placeholder="15.0"></div>
+      <div class="fg"><label>&nbsp;</label><button type="submit" class="btn btn-primary">Enregistrer</button></div>
+    </div>
+    <p style="font-size:11px;color:#aaa;margin-top:6px">Si une note existe deja, elle sera mise a jour.</p>
+  </form>
+</div>
+<div class="card">
+  <div class="card-title">
+    Notes saisies
+    <div style="display:flex;gap:6px">
+      <form method="GET" style="display:flex;gap:6px">
+        <select name="classe_id" onchange="this.form.submit()" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px">
+          <option value="">Toutes classes</option>
+          {% for c in classes %}<option value="{{ c.id }}" {% if classe_id==c.id|string %}selected{% endif %}>{{ c.nom }}</option>{% endfor %}
+        </select>
+        <select name="semestre" onchange="this.form.submit()" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px">
+          <option value="1" {% if semestre=='1' %}selected{% endif %}>S1</option>
+          <option value="2" {% if semestre=='2' %}selected{% endif %}>S2</option>
+        </select>
+      </form>
+    </div>
+  </div>
+  <div class="table-wrap">
+  <table><thead><tr><th>Etudiant</th><th>Matricule</th><th>Matiere</th><th>Devoir</th><th>Examen</th><th>Finale</th><th>Credits</th></tr></thead>
+  <tbody>{% for n in notes %}<tr>
+    <td><strong>{{ n.etudiant_prenom }} {{ n.etudiant_nom }}</strong></td>
+    <td><span class="mat">{{ n.matricule }}</span></td>
+    <td>{{ n.matiere_nom }}</td>
+    <td>{{ n.note_devoir or '—' }}</td>
+    <td>{{ n.note_examen or '—' }}</td>
+    <td><span class="{% if n.note_finale >= 10 %}note-h{% elif n.note_finale >= 5 %}note-m{% else %}note-l{% endif %}">{{ n.note_finale or '—' }}/20</span></td>
+    <td><span class="badge {% if n.note_finale and n.note_finale >= 10 %}badge-green{% else %}badge-red{% endif %}">{{ n.credits }} cr</span></td>
+  </tr>{% else %}<tr><td colspan="7" style="text-align:center;color:#aaa;padding:20px">Aucune note</td></tr>{% endfor %}
+  </tbody></table>
+  </div>
+</div>
+{% endblock %}

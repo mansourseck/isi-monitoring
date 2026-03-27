@@ -1,0 +1,48 @@
+{% extends "shared/base.html" %}
+{% block title %}Mes notes{% endblock %}
+{% block page_title %}Mes notes{% endblock %}
+{% block breadcrumb %}Mon espace / Notes{% endblock %}
+{% block content %}
+<div class="sem-tabs">
+  <a href="?semestre=1" class="sem-tab {% if semestre=='1' %}active{% endif %}">Semestre 1</a>
+  <a href="?semestre=2" class="sem-tab {% if semestre=='2' %}active{% endif %}">Semestre 2</a>
+</div>
+{% set sd = bulletin.get('s'+semestre, {}) %}
+{% if sd %}
+<div class="card" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;padding:20px">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px">Moyenne Semestre {{ semestre }}</div>
+      <div style="font-size:36px;font-weight:800;{% if sd.moyenne >= 10 %}color:#4ade80{% else %}color:#f87171{% endif %}">{{ sd.moyenne }}<span style="font-size:16px">/20</span></div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:12px;color:#888">Credits valides</div>
+      <div style="font-size:28px;font-weight:700;color:#60a5fa">{{ sd.credits_valides }}<span style="font-size:14px">/60</span></div>
+      <div class="credits-bar" style="width:160px;margin-top:6px"><div class="credits-fill" style="width:{{ [sd.credits_valides/60*100,100]|min }}%"></div></div>
+    </div>
+    <div>
+      <div style="font-size:12px;color:#888">Statut</div>
+      <div style="font-size:18px;font-weight:700;margin-top:4px">
+        {% if sd.valide %}<span class="badge badge-green">Semestre valide</span>{% else %}<span class="badge badge-red">En cours</span>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+<div class="card">
+  <div class="card-title">Notes du Semestre {{ semestre }}</div>
+  <div class="table-wrap">
+  <table><thead><tr><th>Matiere</th><th>Code</th><th>Credits</th><th>Devoir (40%)</th><th>Examen (60%)</th><th>Finale</th><th>Statut</th></tr></thead>
+  <tbody>{% for n in notes %}<tr>
+    <td><strong>{{ n.matiere_nom }}</strong></td>
+    <td><span class="mat">{{ n.matiere_code }}</span></td>
+    <td>{{ n.credits }}</td>
+    <td>{{ n.note_devoir or '—' }}</td>
+    <td>{{ n.note_examen or '—' }}</td>
+    <td><span class="{% if n.note_finale >= 10 %}note-h{% elif n.note_finale >= 5 %}note-m{% else %}note-l{% endif %}">{{ n.note_finale or '—' }}/20</span></td>
+    <td>{% if n.note_finale %}<span class="badge {% if n.note_finale >= 10 %}badge-green{% else %}badge-red{% endif %}">{% if n.note_finale >= 10 %}Valide{% else %}Echec{% endif %}</span>{% else %}<span class="badge badge-gray">En attente</span>{% endif %}</td>
+  </tr>{% else %}<tr><td colspan="7" style="text-align:center;color:#aaa;padding:20px">Aucune note pour ce semestre</td></tr>{% endfor %}
+  </tbody></table>
+  </div>
+</div>
+{% endblock %}

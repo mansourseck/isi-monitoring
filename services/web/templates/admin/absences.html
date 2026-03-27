@@ -1,0 +1,69 @@
+{% extends "shared/base.html" %}
+{% block title %}Absences{% endblock %}
+{% block page_title %}Absences{% endblock %}
+{% block breadcrumb %}Scolarite / Absences{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">
+    Absences <span class="badge badge-blue">{{ absences|length }}</span>
+    <form method="GET" style="display:inline-flex;gap:6px">
+      <select name="classe_id" onchange="this.form.submit()" style="padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px">
+        <option value="">Toutes les classes</option>
+        {% for c in classes %}<option value="{{ c.id }}" {% if classe_id==c.id|string %}selected{% endif %}>{{ c.nom }}</option>{% endfor %}
+      </select>
+    </form>
+  </div>
+  <p style="font-size:12px;color:#aaa;margin-bottom:12px">L'admin ne gere pas les absences mais peut les consulter, modifier le statut et supprimer.</p>
+  <div class="table-wrap">
+  <table><thead><tr><th>Etudiant</th><th>Matricule</th><th>Classe</th><th>Matiere</th><th>Date</th><th>Justifiee</th><th>Motif</th><th>Actions</th></tr></thead>
+  <tbody>{% for a in absences %}
+  <tr class="{% if not a.justifiee %}warn-row{% endif %}">
+    <td><strong>{{ a.prenom }} {{ a.nom }}</strong></td>
+    <td><span class="mat">{{ a.matricule }}</span></td>
+    <td><span class="badge badge-blue">{{ a.classe_nom }}</span></td>
+    <td>{{ a.matiere_nom }}</td>
+    <td>{{ a.date_absence }}</td>
+    <td>{% if a.justifiee %}<span class="badge badge-green">Oui</span>{% else %}<span class="badge badge-red">Non</span>{% endif %}</td>
+    <td>{{ a.motif or '—' }}</td>
+    <td>
+      <div class="btn-group">
+        <button onclick="openEdit({{ a.id }},'{{ a.justifiee }}','{{ a.motif or '' }}')" class="btn btn-secondary btn-sm">Modifier</button>
+        <a href="/admin/absences/{{ a.id }}/supprimer" onclick="return confirm('Supprimer ?')" class="btn btn-danger btn-sm">Supprimer</a>
+      </div>
+    </td>
+  </tr>{% else %}<tr><td colspan="8" style="text-align:center;color:#aaa;padding:20px">Aucune absence</td></tr>{% endfor %}
+  </tbody></table>
+  </div>
+</div>
+<!-- Modal edit absence -->
+<div id="modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:14px;padding:28px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <h3 style="margin-bottom:16px;font-size:16px">Modifier l'absence</h3>
+    <form id="editForm" method="POST">
+      <div class="fg" style="margin-bottom:12px">
+        <label>Justifiee ?</label>
+        <select name="justifiee" id="editJustifiee" style="padding:8px;border:1px solid #ddd;border-radius:8px;width:100%">
+          <option value="">Non</option>
+          <option value="on">Oui</option>
+        </select>
+      </div>
+      <div class="fg" style="margin-bottom:16px">
+        <label>Motif</label>
+        <textarea name="motif" id="editMotif" rows="3" style="padding:8px;border:1px solid #ddd;border-radius:8px;width:100%;resize:none"></textarea>
+      </div>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">Sauvegarder</button>
+        <button type="button" onclick="document.getElementById('modal').style.display='none'" class="btn btn-secondary">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script>
+function openEdit(id, justifiee, motif) {
+  document.getElementById('editForm').action = '/admin/absences/'+id+'/modifier';
+  document.getElementById('editJustifiee').value = justifiee === 'True' ? 'on' : '';
+  document.getElementById('editMotif').value = motif;
+  document.getElementById('modal').style.display = 'flex';
+}
+</script>{% endblock %}

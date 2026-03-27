@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Emploi du temps — {{ user.prenom }} {{ user.nom }}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:white;padding:20px}
+.print-btn{display:block;margin:0 auto 20px;padding:10px 28px;background:#6d28d9;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+@media print{.print-btn,.sem-btns{display:none}}
+.doc-header{display:flex;justify-content:space-between;border-bottom:3px solid #6d28d9;padding-bottom:12px;margin-bottom:16px}
+.school h2{font-size:18px;font-weight:800;color:#6d28d9}
+.info{text-align:right}.info h1{font-size:16px;font-weight:700}
+.sem-btns{display:flex;gap:8px;margin-bottom:14px}
+.sem-btn{padding:6px 16px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500;background:#f3f4f6;color:#374151}
+.sem-btn.active{background:#6d28d9;color:white}
+.edt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.edt-day{background:#f8f9fa;border-radius:10px;padding:12px}
+.edt-day-title{font-weight:800;font-size:13px;color:#6d28d9;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e9d5ff}
+.slot{background:white;border-left:3px solid #a78bfa;border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:12px}
+.slot .mat{font-weight:700;color:#1a1a2e}
+.slot .time{color:#888;margin-top:2px}
+.slot .info{color:#aaa;font-size:11px}
+.footer{text-align:center;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px;margin-top:14px}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">Imprimer / Sauvegarder en PDF</button>
+<div class="doc-header">
+  <div class="school"><h2>ISI Keur Massar</h2><p>Emploi du temps — {{ user.prenom }} {{ user.nom }}</p><p>{{ prof.grade or '' }} — {{ prof.dept_nom or '' }}</p></div>
+  <div class="info"><h1>Semestre {{ semestre }}</h1><p>Annee academique 2024-2025</p></div>
+</div>
+<div class="sem-btns">
+  <a href="?semestre=1" class="sem-btn {% if semestre=='1' %}active{% endif %}">Semestre 1</a>
+  <a href="?semestre=2" class="sem-btn {% if semestre=='2' %}active{% endif %}">Semestre 2</a>
+</div>
+<div class="edt-grid">
+  {% for jour in jours %}
+  <div class="edt-day">
+    <div class="edt-day-title">{{ jour }}</div>
+    {% for s in edt.get(jour, []) %}
+    <div class="slot">
+      <div class="mat">{{ s.matiere_nom }}</div>
+      <div class="time">{{ s.heure_debut[:5] if s.heure_debut else '' }} – {{ s.heure_fin[:5] if s.heure_fin else '' }}</div>
+      <div class="info">{{ s.classe_nom }} | {{ s.salle or '' }}</div>
+    </div>
+    {% else %}<div style="color:#ccc;font-size:11px;text-align:center;padding:10px">—</div>{% endfor %}
+  </div>
+  {% endfor %}
+</div>
+<div class="footer">Emploi du temps genere par ISI Monitor — 2024-2025</div>
+</body>
+</html>

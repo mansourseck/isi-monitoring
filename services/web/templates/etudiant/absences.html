@@ -1,0 +1,17 @@
+{% extends "shared/base.html" %}
+{% block title %}Mes absences{% endblock %}
+{% block page_title %}Mes absences{% endblock %}
+{% block breadcrumb %}Mon espace / Absences{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Mes absences <span class="badge badge-blue">{{ absences|length }}</span></div>
+  <table><thead><tr><th>Matiere</th><th>Date</th><th>Justifiee</th><th>Motif</th></tr></thead>
+  <tbody>{% for a in absences %}<tr class="{% if not a.justifiee %}warn-row{% endif %}">
+    <td><strong>{{ a.matiere_nom }}</strong></td>
+    <td>{{ a.date_absence }}</td>
+    <td>{% if a.justifiee %}<span class="badge badge-green">Oui</span>{% else %}<span class="badge badge-red">Non</span>{% endif %}</td>
+    <td>{{ a.motif or '—' }}</td>
+  </tr>{% else %}<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px">Aucune absence enregistree</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

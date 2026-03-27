@@ -1,0 +1,21 @@
+{% extends "shared/base.html" %}
+{% block title %}Mes cours{% endblock %}
+{% block page_title %}Mes cours{% endblock %}
+{% block breadcrumb %}Mes classes / Cours{% endblock %}
+{% block content %}
+{% for classe, mats in classes_map.items() %}
+<div class="card">
+  <div class="card-title"><span class="badge badge-blue" style="margin-right:8px">{{ classe }}</span>{{ mats|length }} matiere(s)</div>
+  <table><thead><tr><th>Matiere</th><th>Code</th><th>Credits</th><th>Coefficient</th><th>Semestre</th></tr></thead>
+  <tbody>{% for m in mats %}<tr>
+    <td><strong>{{ m.nom }}</strong></td>
+    <td><span class="mat">{{ m.code }}</span></td>
+    <td><span class="badge badge-teal">{{ m.credits }} cr</span></td>
+    <td>{{ m.coefficient }}</td>
+    <td><span class="badge badge-amber">S{{ m.semestre }}</span></td>
+  </tr>{% endfor %}</tbody></table>
+</div>
+{% else %}
+<div class="card"><p style="text-align:center;color:#aaa;padding:30px">Aucun cours affecte. Contactez l'administration.</p></div>
+{% endfor %}
+{% endblock %}

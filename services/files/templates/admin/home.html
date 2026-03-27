@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Admin — Rapports{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Vue d'ensemble</div>
+  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
+    <div class="stat"><div class="v">{{ stats.etudiants or 0 }}</div><div class="l">Etudiants</div></div>
+    <div class="stat"><div class="v">{{ stats.profs or 0 }}</div><div class="l">Professeurs</div></div>
+    <div class="stat"><div class="v">{{ stats.classes or 0 }}</div><div class="l">Classes</div></div>
+    <div class="stat"><div class="v">{{ stats.notes or 0 }}</div><div class="l">Notes</div></div>
+  </div>
+  <div class="btn-group" style="margin-top:14px">
+    <a href="/admin/rapport/general" class="btn btn-primary">Rapport general (toutes classes)</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Rapports par classe</div>
+  <div class="grid">
+    {% for c in classes %}
+    <div class="doc-card">
+      <h3>{{ c.nom }}</h3>
+      <div class="meta">{{ c.filiere_nom }} — {{ c.dept_nom or '—' }} — {{ c.nb_etudiants }} etudiant(s)</div>
+      <div class="btn-group">
+        <a href="/admin/rapport/classe/{{ c.id }}" target="_blank" class="btn btn-primary btn-sm">Voir rapport</a>
+        <button onclick="printPage('/admin/rapport/classe/{{ c.id }}')" class="btn btn-secondary btn-sm">Imprimer</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Rapports par professeur</div>
+  <div class="grid">
+    {% for p in profs %}
+    <div class="doc-card" style="border-top-color:#8b5cf6">
+      <h3>{{ p.prenom }} {{ p.nom }}</h3>
+      <div class="meta">{{ p.grade or '—' }} — {{ p.dept_nom or '—' }}</div>
+      <a href="/admin/rapport/prof/{{ p.prof_id }}" target="_blank" class="btn btn-sm" style="background:#f3e8ff;color:#6b21a8">Voir rapport</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function printPage(url) {
+  const w = window.open(url, '_blank');
+  w.onload = () => w.print();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "shared/base.html" %}
+{% block title %}Filieres{% endblock %}
+{% block page_title %}Filieres{% endblock %}
+{% block breadcrumb %}Structure / Filieres{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Ajouter une filiere</div>
+  <form method="POST" action="/admin/filieres/ajouter">
+    <div class="form-row">
+      <div class="fg"><label>Nom</label><input type="text" name="nom" placeholder="Reseaux et Informatique" required></div>
+      <div class="fg"><label>Code</label><input type="text" name="code" placeholder="RI" required></div>
+      <div class="fg"><label>Departement</label>
+        <select name="departement_id">
+          <option value="">-- Choisir --</option>
+          {% for d in depts %}<option value="{{ d.id }}">{{ d.nom }} ({{ d.code }})</option>{% endfor %}
+          <option value="">Nouveau (saisir manuellement ci-dessus)</option>
+        </select>
+      </div>
+      <div class="fg"><label>&nbsp;</label><button type="submit" class="btn btn-primary">Ajouter</button></div>
+    </div>
+  </form>
+</div>
+<div class="card">
+  <div class="card-title">Filieres <span class="badge badge-blue">{{ filieres|length }}</span></div>
+  <table><thead><tr><th>Code</th><th>Nom</th><th>Departement</th><th>Action</th></tr></thead>
+  <tbody>{% for f in filieres %}<tr>
+    <td><span class="mat">{{ f.code }}</span></td>
+    <td><strong>{{ f.nom }}</strong></td>
+    <td><span class="badge badge-teal">{{ f.dept_nom or '—' }}</span></td>
+    <td><a href="/admin/filieres/{{ f.id }}/supprimer" onclick="return confirm('Supprimer ?')" class="btn btn-danger btn-sm">Supprimer</a></td>
+  </tr>{% else %}<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px">Aucune filiere</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

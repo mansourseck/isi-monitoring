@@ -1,0 +1,57 @@
+{% extends "shared/base.html" %}
+{% block title %}Dashboard Etudiant{% endblock %}
+{% block page_title %}Bonjour, {{ user.prenom }}{% endblock %}
+{% block breadcrumb %}Mon espace{% endblock %}
+{% block content %}
+{% set etu = user.etudiant or {} %}
+<div class="card">
+  <div class="profile-card">
+    <div class="avatar av-etu">{{ user.prenom[0] if user.prenom else 'E' }}</div>
+    <div>
+      <h3 style="font-size:18px;font-weight:700">{{ user.prenom }} {{ user.nom }}</h3>
+      <p style="color:#888;font-size:13px">{{ etu.classe_nom or '—' }} — {{ etu.filiere_nom or '—' }}</p>
+      <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+        <span class="mat">{{ etu.matricule or '—' }}</span>
+        <span class="badge badge-blue">{{ etu.niveau_nom or '—' }}</span>
+        <span class="badge badge-teal">{{ etu.dept_nom or '—' }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% if bulletin %}
+<div class="stats-grid">
+  {% for s in [1,2] %}
+  {% set sd = bulletin.get('s'+s|string, {}) %}
+  <div class="stat {% if sd.get('valide') %}green{% else %}blue{% endif %}">
+    <div class="stat-label">Semestre {{ s }}</div>
+    <div class="stat-value">{{ sd.get('moyenne','—') }}<span style="font-size:14px">/20</span></div>
+    <div style="font-size:11px;color:#888;margin-top:4px">
+      {{ sd.get('credits_valides',0) }}/60 credits
+      {% if sd.get('valide') %}<span class="badge badge-green" style="margin-left:4px">Valide</span>{% endif %}
+    </div>
+    {% if sd.get('credits_valides') %}
+    <div class="credits-bar"><div class="credits-fill" style="width:{{ [sd.get('credits_valides',0)/60*100,100]|min }}%"></div></div>
+    {% endif %}
+  </div>
+  {% endfor %}
+  <div class="stat amber">
+    <div class="stat-label">Notes saisies</div>
+    <div class="stat-value">{{ notes_s1|length + notes_s2|length }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Absences</div>
+    <div class="stat-value">{{ absences|length }}</div>
+  </div>
+</div>
+{% endif %}
+<div class="card">
+  <div class="card-title">Acces rapide</div>
+  <div class="btn-group">
+    <a href="/etudiant/notes?semestre=1" class="btn btn-primary">Notes S1</a>
+    <a href="/etudiant/notes?semestre=2" class="btn btn-primary">Notes S2</a>
+    <a href="/etudiant/absences" class="btn btn-secondary">Mes absences</a>
+    <a href="/etudiant/edt" class="btn btn-secondary">Emploi du temps</a>
+    <a href="http://files.isi-monitor.local:8082" target="_blank" class="btn btn-secondary">Bulletins PDF</a>
+  </div>
+</div>
+{% endblock %}

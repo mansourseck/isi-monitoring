@@ -1,0 +1,33 @@
+{% extends "shared/base.html" %}
+{% block title %}Mon profil{% endblock %}
+{% block page_title %}Mon profil{% endblock %}
+{% block breadcrumb %}Mon espace / Profil{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="profile-card">
+    <div class="avatar av-prof">{{ user.prenom[0] if user.prenom else 'P' }}</div>
+    <div>
+      <h3 style="font-size:20px;font-weight:700">{{ user.prenom }} {{ user.nom }}</h3>
+      <p style="color:#888;font-size:13px">{{ prof.grade or 'Professeur' }} — {{ prof.dept_nom or '' }}</p>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="badge badge-purple">{{ prof.dept_code or '—' }}</span>
+        <span class="badge badge-gray">{{ user.username }}</span>
+        <span class="badge badge-green">Professeur</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-title">Informations personnelles <span style="font-size:12px;color:#aaa">(lecture seule)</span></div>
+  <div class="info-grid">
+    <div class="info-item"><div class="lbl">Nom complet</div><div class="val">{{ user.prenom }} {{ user.nom }}</div></div>
+    <div class="info-item"><div class="lbl">Email</div><div class="val">{{ user.email or '—' }}</div></div>
+    <div class="info-item"><div class="lbl">Telephone</div><div class="val">{{ user.telephone or '—' }}</div></div>
+    <div class="info-item"><div class="lbl">Departement</div><div class="val">{{ prof.dept_nom or '—' }}</div></div>
+    <div class="info-item"><div class="lbl">Grade</div><div class="val">{{ prof.grade or '—' }}</div></div>
+    <div class="info-item"><div class="lbl">Specialite</div><div class="val">{{ prof.specialite or '—' }}</div></div>
+  </div>
+  <p style="font-size:12px;color:#aaa;margin-top:14px">Pour modifier vos informations, contactez l'administration.</p>
+  <a href="/change-password" class="btn btn-secondary btn-sm" style="margin-top:10px">Changer mot de passe</a>
+</div>
+{% endblock %}

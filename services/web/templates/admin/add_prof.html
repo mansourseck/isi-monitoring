@@ -1,0 +1,47 @@
+{% extends "shared/base.html" %}
+{% block title %}Ajouter professeur{% endblock %}
+{% block page_title %}Ajouter un professeur{% endblock %}
+{% block breadcrumb %}Professeurs / Nouveau{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Nouveau professeur</div>
+  <form method="POST" action="/admin/profs/ajouter">
+    <div class="form-row">
+      <div class="fg"><label>Username</label><input type="text" name="username" placeholder="mdiallo" required></div>
+      <div class="fg"><label>Mot de passe initial</label><input type="text" name="password" value="prof123"></div>
+      <div class="fg"><label>Nom</label><input type="text" name="nom" placeholder="Diallo" required></div>
+      <div class="fg"><label>Prenom</label><input type="text" name="prenom" placeholder="Mamadou" required></div>
+      <div class="fg"><label>Email</label><input type="email" name="email" placeholder="mdiallo@isi.sn"></div>
+      <div class="fg"><label>Telephone</label><input type="text" name="telephone" placeholder="+221 77..."></div>
+      <div class="fg"><label>Departement</label>
+        <select name="departement_id">
+          <option value="">-- Choisir --</option>
+          {% for d in depts %}<option value="{{ d.id }}">{{ d.nom }} ({{ d.code }})</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg"><label>Grade</label>
+        <select name="grade">
+          <option>Assistant</option>
+          <option>Maitre assistant</option>
+          <option>Maitre de conferences</option>
+          <option>Professeur</option>
+          <option>Vacataire</option>
+        </select>
+      </div>
+      <div class="fg"><label>Specialite</label><input type="text" name="specialite" placeholder="Reseaux et securite"></div>
+    </div>
+    <div class="fg" style="margin-top:14px">
+      <label>Matieres a enseigner (selection multiple)</label>
+      <select name="matiere_ids" multiple size="8" style="border:1px solid #ddd;border-radius:8px;padding:8px">
+        {% for m in matieres %}<option value="{{ m.id }}">{{ m.nom }} — {{ m.classe_nom }} — S{{ m.semestre }}</option>{% endfor %}
+      </select>
+      <p style="font-size:11px;color:#aaa;margin-top:4px">Maintenir Ctrl (ou Cmd) pour selectionner plusieurs matieres</p>
+    </div>
+    <div class="btn-group" style="margin-top:16px">
+      <button type="submit" class="btn btn-primary">Creer le compte</button>
+      <a href="/admin/profs" class="btn btn-secondary">Annuler</a>
+    </div>
+    <p style="font-size:11px;color:#aaa;margin-top:8px">Le prof devra changer son mot de passe a la premiere connexion.</p>
+  </form>
+</div>
+{% endblock %}

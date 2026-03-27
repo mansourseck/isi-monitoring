@@ -1,0 +1,40 @@
+{% extends "shared/base.html" %}
+{% block title %}Classes{% endblock %}
+{% block page_title %}Classes{% endblock %}
+{% block breadcrumb %}Structure / Classes{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-title">Ajouter une classe</div>
+  <form method="POST" action="/admin/classes/ajouter">
+    <div class="form-row">
+      <div class="fg"><label>Niveau</label>
+        <select name="niveau_id" required>
+          <option value="">-- Choisir --</option>
+          {% for n in niveaux %}<option value="{{ n.id }}">{{ n.nom }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg"><label>Filiere</label>
+        <select name="filiere_id" required>
+          <option value="">-- Choisir --</option>
+          {% for f in filieres %}<option value="{{ f.id }}">{{ f.nom }} ({{ f.code }})</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fg"><label>Nom personnalise (optionnel)</label><input type="text" name="nom_custom" placeholder="Laissez vide pour auto"></div>
+      <div class="fg"><label>&nbsp;</label><button type="submit" class="btn btn-primary">Creer</button></div>
+    </div>
+    <p style="font-size:11px;color:#aaa;margin-top:6px">Le nom sera genere automatiquement si non specifie (ex: L3 RI)</p>
+  </form>
+</div>
+<div class="card">
+  <div class="card-title">Classes <span class="badge badge-blue">{{ classes|length }}</span></div>
+  <table><thead><tr><th>Nom</th><th>Niveau</th><th>Filiere</th><th>Departement</th><th>Etudiants</th></tr></thead>
+  <tbody>{% for c in classes %}<tr>
+    <td><strong>{{ c.nom }}</strong></td>
+    <td><span class="badge badge-purple">{{ c.niveau_nom }}</span></td>
+    <td><span class="badge badge-blue">{{ c.filiere_nom }} ({{ c.filiere_code }})</span></td>
+    <td><span class="badge badge-teal">{{ c.dept_nom or '—' }}</span></td>
+    <td><span class="badge badge-gray">{{ c.nb_etudiants }}</span></td>
+  </tr>{% else %}<tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px">Aucune classe</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

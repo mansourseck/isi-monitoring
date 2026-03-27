@@ -1,0 +1,49 @@
+name: CI/CD — Build et push Docker Hub
+
+on:
+push:
+branches: [ main ]
+
+jobs:
+build-and-push:
+runs-on: ubuntu-latest
+
+```
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+
+  - name: Login Docker Hub
+    uses: docker/login-action@v3
+    with:
+      username: \${{ secrets.DOCKERHUB_USERNAME }}
+      password: \${{ secrets.DOCKERHUB_TOKEN }}
+
+  - name: Build & Push service_web
+    uses: docker/build-push-action@v5
+    with:
+      context: ./services/web
+      push: true
+      tags: \${{ secrets.DOCKERHUB_USERNAME }}/isi-web:latest
+
+  - name: Build & Push service_files
+    uses: docker/build-push-action@v5
+    with:
+      context: ./services/files
+      push: true
+      tags: \${{ secrets.DOCKERHUB_USERNAME }}/isi-files:latest
+
+  - name: Build & Push dashboard
+    uses: docker/build-push-action@v5
+    with:
+      context: ./flask_app
+      push: true
+      tags: \${{ secrets.DOCKERHUB_USERNAME }}/isi-dashboard:latest
+
+  - name: Build & Push worker
+    uses: docker/build-push-action@v5
+    with:
+      context: ./worker
+      push: true
+      tags: \${{ secrets.DOCKERHUB_USERNAME }}/isi-worker:latest
+```
